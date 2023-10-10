@@ -1,0 +1,115 @@
+% Standard Article Definition
+\documentclass[9pt, onecolumn]{report}
+
+% Page Formatting
+\usepackage[margin=0.5in]{geometry}
+
+% \setlength\parindent{0pt}
+% \pagestyle{fancy}
+
+% Graphics
+\usepackage{graphicx}
+
+% Math Packages
+\usepackage{physics}
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{mathtools}
+
+% Extra Packages
+% \usepackage{pdfpages}
+% \usepackage{hyperref}
+\usepackage{todonotes}
+% \usepackage{listings}
+
+%Custom Commands
+% \newcommand{\N}{\mathbb{N}}
+% \newcommand{\Z}{\mathbb{Z}}
+% \newcommand{\Q}{\mathbb{Q}}
+% \newcommand{\R}{\mathbb{R}}
+% \newcommand{\C}{\mathbb{C}}
+
+% \newcommand{\SigAlg}{\mathcal{S}}
+
+% \newcommand{\Rel}{\mathcal{R}}
+
+% \newcommand{\toI}{\xrightarrow{\textsf{\tiny I}}}
+% \newcommand{\toS}{\xrightarrow{\textsf{\tiny S}}}
+% \newcommand{\toB}{\xrightarrow{\textsf{\tiny B}}}
+
+% \newcommand{\divisible}{ \ \vdots \ }
+% \newcommand{\st}{\ : \ }
+
+% % Theorem Definition
+% \newtheorem{definition}{Definition}
+% \newtheorem{assumption}{Assumption}
+% \newtheorem{theorem}{Theorem}
+% \newtheorem{lemma}{Lemma}
+% \newtheorem{proposition}{Proposition}
+% \newtheorem{remark}{Remark}
+% % \newtheorem{example}{Example}
+% % \newtheorem{counterExample}{Counter Example}
+
+
+%opening
+\title{
+    MECH 6V29 - Model Predictive Control \\ 
+    Project description
+}
+\author{Jonas Wagner}
+\date{2023, October 13\textsuperscript{th}}
+
+\begin{document}
+
+\maketitle
+
+\section*{Abstract}
+In this project, NOVA's autonomous vehicle, Hail Bopp, will be modeled as a nonlinear time-invarient system and Robust MPC techniques will be applied in simulations.
+Specifically, an MPC-based path planning process will be implemented to produce training data for neural networks to be run on-line.
+
+\section*{Vehicle Modeling}
+A vast majority of the modeling will be using the derivations and results from \cite{vehcileDynamics_chapter2a} and \cite{casanova_thesis}.
+
+\subsection*{Nonlinear Dynamics}
+The local vehicle dynamics can be modeled in many levels of complexity.
+Initially, the unicycle dynamics can be used (direct control of linear- and rotational-velocity) but the 2- and 3-dof bicycle models (potentially the full 14-dof ackerman-steering model) will be derived (not necessarily implemented within the project scope) to describe the dynamics within the local reference frame.
+
+\subsection*{Linearization}
+The transformation from local to global coordinates is inherently nonlinear but can be linearized to some uncertainty (i.e. additive system noise) for each time-step.
+Linearization of the local dynamics is also possible although this greatly limits the steering angle input without introducing very large system noise.
+
+Within the scope of this project, the linearized versions of these dynamics may be used; however, since the creation of training data does not need to be done in real-time, the higher-order nonlinear models could be used for a better planning baseline (i.e. any computational limitations will be ignored).
+
+\section*{Control Objectives}
+\subsection*{Planning Problem}
+The control problem to be solved is to do the trajectory planning for the immediate (10-30 second) time-horizon given an occupancy-map and a next waypoint.
+Using many sensors (GPS/LIDAR/vision/odometry/etc.), the perception stack will derive the current vehicle state along with a complete map of the environment.
+Although it's a very poor assumption from a robustness perspective, this project will take the perception stack results will be taken as a ground truth.
+
+For this project, the planning from general route trajectory (a future way-point) and a cost function for the vehicle being in different locations (i.e. don't hit this person/car) will be provided across the entire prediction horizon.
+I'm uncertain if the final implementation will require the prediction of the environment to be incorporated into the model (and thus constraints) themselves, but initially, the predicted movement of people/cars in the environment will be incorporated into the cost-map over time.
+
+\subsection*{Robust MPC}
+Although initially the implementation of this project will focus on ensuring feasibility and that the model, the vast amount of uncertainties for both the vehicle dynamics and the changing environment uncertainty will require the addition robustness considerations.
+
+Hard state constraints could be derived from the environment cost-function; however, additional state constraints could be added specifically for moving objects in the environment.
+System noise from the vehicle dynamics and measurement/perception noise could also be incorporated in the problem formulation.
+
+It is necessary to do a more thorough analysis of literature is needed to do this robust component of this project (specifically for path generation); however, an initial search of MPC on vehicle dynamics is \cite{MPC_PathTracking} and \cite{reachAnalysis_SafetyAssessment}.
+
+\section*{Simulations}
+The objective of simulations, in addition to just demonstrating results for this project, will eventually be used by NOVA to generate training data to train the neural-nets that generate planned trajectories for online operation.
+
+The final implementation that generates the training data would ideally be written in python to be ran on the vehicle simulation software, CARLA; requiring a python implementation.
+Do to the constraints of the project, initial/simple examples will be implemented in MATLAB to prove the underlying theory, but ideally python (and potentially integration with CARLA) could be used to produce the real numerical results for this project.
+
+
+% Appendix ----------------------------------------------
+\newpage
+\appendix
+\bibliographystyle{ieeetran}
+\bibliography{refs.bib}
+
+
+
+
+\end{document}
