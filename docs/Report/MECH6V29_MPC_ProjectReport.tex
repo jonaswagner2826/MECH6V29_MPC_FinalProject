@@ -1,0 +1,174 @@
+% \documentclass[]{article}
+% \documentclass[onecolumn]{IEEEtran}
+% onecolumn for readability
+\documentclass[]{IEEEtran}
+
+% -----------------------------------------------------
+% Preamble
+% -----------------------------------------------------
+% Math Packages
+\usepackage{physics}
+\usepackage{amsmath, amssymb, empheq}
+\usepackage{thmtools}
+% \usepackage[per-mode=symbol]{siunitx}
+
+% Format Packages/Settings
+\usepackage{todonotes}
+\usepackage{xcolor}
+\usepackage[]{hyperref}
+\renewcommand{\figureautorefname}{Fig.}
+% \usepackage[inline, shortlabels]{enumitem}
+\usepackage{paralist}
+\usepackage{cite}
+
+
+% Theorems
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{system}{System}
+
+% % Custom Commands
+% \newcommand{\R}{\mathbb{R}}
+% \newcommand{\N}{\mathbb{N}}
+% \newcommand{\st}{ \ | \ }
+
+% \newcommand{\E}{\mathcal{E}}
+% \newcommand{\Ebar}{\bar{\mathcal{E}}}
+% \newcommand{\X}{\mathcal{X}}
+% \newcommand{\Xbar}{\bar{\mathcal{X}}}
+% % \newcommand{\U}{\mathcal{U}}
+% % \newcommand{\Ubar}{\bar{\mathcal{U}}}
+% \newcommand{\F}{\mathcal{F}}
+
+
+%% Title and stuff
+\title{
+    Unnamed MPC Project Report
+}
+\author{Jonas Wagner} % assuming Jonas and Justin... add Tanner?
+
+
+% -----------------------------------------------------
+% Begin Document
+% -----------------------------------------------------
+\begin{document}
+
+% -----------------------------------------------------
+% Title and Abstract
+% -----------------------------------------------------
+\maketitle
+\begin{abstract}
+    Insert Abstract
+\end{abstract}
+
+
+
+
+% -----------------------------------------------------
+% Introduction
+% -----------------------------------------------------
+\section{Introduction}
+
+\todo{Copy stuff from Proposal}
+
+
+% -----------------------------------------------------
+% Problem Definition
+% -----------------------------------------------------
+\section{Problem Definition}
+\label{sec:pblm_def}
+
+
+
+
+
+% Model Definition
+\subsection{Model Definition}
+\label{subsec:mdl_def}
+
+
+
+% Path Planning
+\subsection{Path Planning}
+\label{subsec:pathPlanning}
+
+The objective is to create high-fidelity MPC controller to produce an optimal trajectory to reach a waypoint given the occupancy map of the environment.
+This controller will then be used to generate training data for a neural network which will be able to perform an approximation of this controller in real-time.
+
+From the perception stack, the current vehicle states (local and global) will be known to some uncertainty and the surrounding environment will be processed into a predicted occupancy map.
+This occupancy map will be assumed to already have weights corresponding to where it is safe/ideal for the vehicle to be in the future.
+
+\todo{add specific math symbols for all these things}
+
+
+
+
+
+% -----------------------------------------------------
+% Problem Solution
+% -----------------------------------------------------
+\section{Problem Solution}
+\label{sec:pblm_soln}
+The MPC Controller for path planning is formulated with the current state and model update equations as hard constraints, an objective to minimize the time and distance to reach the future waypoint, and introducing the occupancy map as soft-constraints within the objective function.
+
+% Model Constraints
+\subsection{Model Constraints}
+
+
+
+% Cost Function
+\subsection{Cost Function}
+
+
+
+% % MPC Controller Formulation
+% \subsection{MPC Controller Formulation}
+
+
+
+
+
+
+
+
+% -----------------------------------------------------
+% Simulation and Results
+% -----------------------------------------------------
+\section{Simulation and Results}
+\label{sec:sim_and_results}
+
+
+
+
+
+
+
+
+
+
+
+
+% -----------------------------------------------------
+% Conclusion
+% -----------------------------------------------------
+\section{Conclusion}
+TODO:
+add something here...
+
+\cite{MPC_PathTracking} % just to test
+
+
+
+% -----------------------------------------------------
+% References
+% -----------------------------------------------------
+\bibliography{refs}{} 
+\bibliographystyle{IEEEtran}
+
+
+
+
+\end{document}
