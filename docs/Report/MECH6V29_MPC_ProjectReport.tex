@@ -20,6 +20,7 @@
 % \usepackage[inline, shortlabels]{enumitem}
 \usepackage{paralist}
 \usepackage{cite}
+\usepackage{graphicx}
 
 
 % Theorems
@@ -83,14 +84,6 @@
 
 
 
-
-
-% Model Definition
-\subsection{Model Definition}
-\label{subsec:mdl_def}
-
-
-
 % Path Planning
 \subsection{Path Planning}
 \label{subsec:pathPlanning}
@@ -102,6 +95,45 @@ From the perception stack, the current vehicle states (local and global) will be
 This occupancy map will be assumed to already have weights corresponding to where it is safe/ideal for the vehicle to be in the future.
 
 \todo{add specific math symbols for all these things}
+
+
+
+
+% Model Definition
+\subsection{Model Definition}
+\label{subsec:mdl_def}
+Hail-Bopp will be modeled as a standard 4-wheel ackerman vehicle.
+The initial model will be based on the 3-dof bicycle model as derived in \cite{casanova_thesis} and \cite{vehcileDynamics_chapter2a}.
+
+
+TO DO: 
+provide the elaboration of the model...
+
+(so many options... likely assume the local dynamics as just a function of $u$ and $\delta$ and put restrictions on them changing quick?...)
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\columnwidth]{figs/BicycleModel.png}
+    \caption{}
+    \label{fig:bikeModel_diagram}
+\end{figure}
+
+Simple non-linear kinematics model equations:
+\begin{equation}
+    \begin{cases}
+        \dot{x} = V \cos(\psi + \beta)\\
+        \dot{y} = V \sin(\psi + \beta)\\
+        \dot{\psi} = \cfrac{V \cos(\beta)}{l_f + l_r} \qty(tan(\delta_f) - tan(\delta_r))\\
+        \dot{theta} = \psi
+    \end{cases}
+\end{equation}
+where
+\begin{equation}
+    \beta = \tan^-1\qty(\cfrac{l_f \tan(\delta_r) + l_r tan(\delta_f)}{l_f + l_r})
+\end{equation}
+
+
 
 
 
@@ -121,6 +153,17 @@ The MPC Controller for path planning is formulated with the current state and mo
 
 % Cost Function
 \subsection{Cost Function}
+
+The primary cost function will be linear from the system state as derived the cost map as the sum of the region that the vehicle would occupy.
+
+Additionally, an objective will be included that describes the foward progression 
+
+
+
+
+
+% Obstical/Robust constraints
+\subsection{Obstical/Robust Constraints}
 
 
 
