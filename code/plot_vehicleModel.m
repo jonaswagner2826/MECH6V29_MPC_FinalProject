@@ -1,10 +1,12 @@
-function plot_vehicleModel(t,x,u,bounds)
+function plot_vehicleModel(t,x,u,bounds,options)
 
 arguments
     t
     x
     u = [];
     bounds = [];
+    options.filename = [];
+    options.title = [];
 end
 
 % Quiver Plot
@@ -18,6 +20,11 @@ quiver(X,Y,U,V,'off')
 axis('equal')
 xlabel('X [m]')
 ylabel('Y [m]')
+
+if ~isempty(options.title); title(options.title); end
+if ~isempty(options.filename)
+    saveas(gcf,strcat(options.filename,'_quiver.png')); 
+end
 
 
 % Rest of the plots
@@ -66,6 +73,12 @@ if ~isempty(u)
     xlabel('Time [s]')
     ylabel('Degrees')
     legend
+
+
+    if ~isempty(options.title); sgtitle(options.title); end
+    if ~isempty(options.filename)
+        saveas(gcf,strcat(options.filename,'_traj.png')); 
+    end
 end
 
 

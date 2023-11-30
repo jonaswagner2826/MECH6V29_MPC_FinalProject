@@ -41,37 +41,53 @@ U_dot_set = Polyhedron('lb',bounds.u_dot_lb, 'ub',bounds.u_dot_ub); U_dot_set.mi
 % plot_vehicleModel(t,x',u_fun,bounds)
 
 
-%% Cost Maps
-% % example construction
-% grid.sep = 0.1; %[m]
-% grid.bounds.bwd = 5; %[m]
-% grid.bounds.fwd = 20; 
-% grid.lat = -grid.bounds.bwd:grid.sep:grid.bounds.fwd;
-% grid.bounds.left = 10;
-% grid.bounds.right = 10;
-% grid.long = -grid.bounds.left:grid.sep:grid.bounds.right;
-% [grid.pos.lat,grid.pos.long] = meshgrid(grid.long,grid.lat);
-% 
-% 
-% clear cost
-% cost = zeros(size(grid.pos.lat));
-% % cost(grid.pos.lat < -2) = 5;
-% % cost(grid.pos.lat > 2) = 5;
-% % cost(grid.pos.long < -2) = 2;
-% cost(grid.pos.long>5 & grid.pos.lat<-1) = 50;
-% % cost(grid.pos.long>5 & grid.pos.lat<1) = 50;
-% figure
-% imshow(cost)
+% %% Cost Maps
+% % % example construction
+% % grid.sep = 0.1; %[m]
+% % grid.bounds.bwd = 5; %[m]
+% % grid.bounds.fwd = 20; 
+% % grid.lat = -grid.bounds.bwd:grid.sep:grid.bounds.fwd;
+% % grid.bounds.left = 10;
+% % grid.bounds.right = 10;
+% % grid.long = -grid.bounds.left:grid.sep:grid.bounds.right;
+% % [grid.pos.lat,grid.pos.long] = meshgrid(grid.long,grid.lat);
+% % 
+% % 
+% % clear cost
+% % cost = zeros(size(grid.pos.lat));
+% % % cost(grid.pos.lat < -2) = 5;
+% % % cost(grid.pos.lat > 2) = 5;
+% % % cost(grid.pos.long < -2) = 2;
+% % cost(grid.pos.long>5 & grid.pos.lat<-1) = 50;
+% % % cost(grid.pos.long>5 & grid.pos.lat<1) = 50;
+% % figure
+% % imshow(cost)
 
+%% Cost Map
+% Cost Map is a grayscale image with the cost at each space pre-determined
+% The perception center of the vehicle, between the back two wheels, 
+% is located (from the bottom left corner) 75px to the right and 50px up 
+% out of the total 150px by 150px costmap image.  
+% The pixels are 0.4m and the whole cost map is 60m by 60m.
 
 
 % load from cost-map png
 costMap_filename = 'costmap1.png';
 costMap_filename = strcat(data_subfolder,filesep,costMap_filename);
-costMap = rescale(im2gray(imread(costMap_filename)));
+costMap = 1 - rescale(im2gray(imread(costMap_filename)));
 
-% costMap_fun = @(x,y) 
 
+mapX = -30 + (0.2:0.4:60); % 60m/2 = 30m
+mapY = -20 + (0.2:0.4:60); % 50px = 20m
+[gridX,gridY] = ndgrid(mapX,mapY);
+costMap_fun = griddedInterpolant(gridX,gridY,rot90(costMap,3));
+surf(gridX,gridY,costMap_fun(gridX,gridY))
+xlabel('x');
+ylabel('y');
+
+% loc2px = @(x,y) round([(x+30)/0.4; (y+20)/0.4]);
+% px2cost = @(px) costMap(end-px(2),px(1));
+costMap_fun = @(x,y) interp2(gridX,gridY,rot90(costMap,3),x,y,'nearest');
 
 
 %% MPC Controller Setup
@@ -87,7 +103,9 @@ constraints = []; objective = 0;
 constraints = [constraints, U_dot_set.A*((u_{1}-u_0)/dt_MPC) <= U_dot_set.b];
 
 for k = 1:N
-    objective = objective + (x_{k}(3)-pi)^2; %idk...
+    % objective = objective - x_{k}(1) + (x_{k}(2)-0).^2 + (x_{k}(3) - pi)^2;
+    % objective = objective + interp2(gridX,gridY,rot90(costMap,3),x_{k}(1),x_{k}(2),'nearest');%costMap_fun(x_{k}(1),x_{k}(2));
+    objective = objective + x_{k}(2);
 
     constraints = [constraints, x_{k+1} == update_eq(x_{k},u_{k},dt_MPC,sys_fun)];
     constraints = [constraints, U_set.A*u_{k} <= U_set.b];
@@ -97,15 +115,14 @@ for k = 1:N
     end
 end
 
-objective = objective + (x_{N+1}(3)-pi)^2; %<--- minimize these things...
+objective = objective + x_{N+1}(2); % + (x_{N+1}(3)-pi)^2; %<--- minimize these things...
+% objective = objective + costMap_fun(x_{N+1}(1),x_{N+1}(2));
+% objective = objective + interp2(gridX,gridY,rot90(costMap,3),x_{N+1}(1),x_{N+1}(2),'nearest');%costMap_fun(x_{k}(1),x_{k}(2));
 
 % opts = sdpsettings('solver','ipopt');
 opts = sdpsettings('solver','ipopt','debug',0,'verbose',0);
+% opts = sdpsettings;
 controller = optimizer(constraints, objective, opts, {x_{1},u_0}, [u_{1}]);
-
-
-
-
 
 
 %% MPC controller testing
@@ -130,10 +147,14 @@ for k = 1:length(tspan)-1
     fprintf('Finished k = %d... elapsed: t = %f\n',k,elapsedTime_{k});
 end
 
+x = [X_{:}]; u = [U_{:}];
 
-x = [X_{:}];
-u = [U_{:}];
-plot_vehicleModel(tspan,x,u,bounds)
+testName = 'Min Y - Unstructured';
+
+
+plot_vehicleModel(tspan,x,u,bounds, ...
+    filename=strcat(fig_subfolder,filesep,strrep(testName,' ','_')), ...
+    title=strcat(testName));
 
 
 

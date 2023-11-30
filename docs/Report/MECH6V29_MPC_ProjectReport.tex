@@ -124,13 +124,13 @@ Simple non-linear kinematics model equations:
     \begin{cases}
         \dot{x} = V \cos(\psi + \beta)\\
         \dot{y} = V \sin(\psi + \beta)\\
-        \dot{\psi} = \cfrac{V \cos(\beta)}{l_f + l_r} \qty(tan(\delta_f) - tan(\delta_r))\\
-        \dot{theta} = \psi
+        \dot{\psi} = \cfrac{V \cos(\beta)}{l_f + l_r} \qty(\tan(\delta_f) - \tan(\delta_r))\\
+        \dot{\theta} = \psi
     \end{cases}
 \end{equation}
 where
 \begin{equation}
-    \beta = \tan^-1\qty(\cfrac{l_f \tan(\delta_r) + l_r tan(\delta_f)}{l_f + l_r})
+    \beta = \tan^{1}\qty(\cfrac{l_f \tan(\delta_r) + l_r tan(\delta_f)}{l_f + l_r})
 \end{equation}
 
 
