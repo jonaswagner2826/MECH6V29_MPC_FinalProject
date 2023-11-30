@@ -7,9 +7,9 @@ fig_subfolder = strcat(filepath,filesep,'figs');
 data_subfolder = strcat(filepath,filesep,'data');
 
 
-% sim settings
-dt = 0.1; tf = 5;
-tspan = 0:dt:tf;
+% % sim settings
+% dt = 0.1; tf = 5;
+% tspan = 0:dt:tf;
 
 
 %% CT-Model (currently using kinnematic model)
@@ -32,6 +32,17 @@ bounds.u_dot_lb = -[2;1].*bounds.u_dot_ub;
 U_set = Polyhedron('lb',bounds.u_lb,'ub',bounds.u_ub); U_set.minHRep;
 U_dot_set = Polyhedron('lb',bounds.u_dot_lb, 'ub',bounds.u_dot_ub); U_dot_set.minHRep;
 
+% % Plot Constraint Sets
+% figure
+% hold on;
+% plot(U_set);
+% plot(U_dot_set,'color','b')
+% xlabel('Velocity (m/s, m/s^2)')
+% ylabel('Angle (rad, rad/s)')
+% legend({'U','U_dot'})
+% title('Input Constraints')
+% saveas(gcf,strcat(fig_subfolder,filesep,'input_constraints.png'))
+
 % %% Initial Simulation
 % u0 = [10; 0];%deg2rad(5)];
 % u_fun = @(t) u0 + [0; deg2rad(15*sin(t))];
@@ -39,29 +50,6 @@ U_dot_set = Polyhedron('lb',bounds.u_dot_lb, 'ub',bounds.u_dot_ub); U_dot_set.mi
 % [t,x] = ode45(@(t,x) sys_fun(x,u_fun(t)),tspan,x0);
 % 
 % plot_vehicleModel(t,x',u_fun,bounds)
-
-
-% %% Cost Maps
-% % % example construction
-% % grid.sep = 0.1; %[m]
-% % grid.bounds.bwd = 5; %[m]
-% % grid.bounds.fwd = 20; 
-% % grid.lat = -grid.bounds.bwd:grid.sep:grid.bounds.fwd;
-% % grid.bounds.left = 10;
-% % grid.bounds.right = 10;
-% % grid.long = -grid.bounds.left:grid.sep:grid.bounds.right;
-% % [grid.pos.lat,grid.pos.long] = meshgrid(grid.long,grid.lat);
-% % 
-% % 
-% % clear cost
-% % cost = zeros(size(grid.pos.lat));
-% % % cost(grid.pos.lat < -2) = 5;
-% % % cost(grid.pos.lat > 2) = 5;
-% % % cost(grid.pos.long < -2) = 2;
-% % cost(grid.pos.long>5 & grid.pos.lat<-1) = 50;
-% % % cost(grid.pos.long>5 & grid.pos.lat<1) = 50;
-% % figure
-% % imshow(cost)
 
 %% Cost Map
 % Cost Map is a grayscale image with the cost at each space pre-determined
@@ -71,23 +59,23 @@ U_dot_set = Polyhedron('lb',bounds.u_dot_lb, 'ub',bounds.u_dot_ub); U_dot_set.mi
 % The pixels are 0.4m and the whole cost map is 60m by 60m.
 
 
-% load from cost-map png
-costMap_filename = 'costmap1.png';
-costMap_filename = strcat(data_subfolder,filesep,costMap_filename);
-costMap = 1 - rescale(im2gray(imread(costMap_filename)));
-
-
-mapX = -30 + (0.2:0.4:60); % 60m/2 = 30m
-mapY = -20 + (0.2:0.4:60); % 50px = 20m
-[gridX,gridY] = ndgrid(mapX,mapY);
-costMap_fun = griddedInterpolant(gridX,gridY,rot90(costMap,3));
-surf(gridX,gridY,costMap_fun(gridX,gridY))
-xlabel('x');
-ylabel('y');
-
-% loc2px = @(x,y) round([(x+30)/0.4; (y+20)/0.4]);
-% px2cost = @(px) costMap(end-px(2),px(1));
-costMap_fun = @(x,y) interp2(gridX,gridY,rot90(costMap,3),x,y,'nearest');
+% % load from cost-map png
+% costMap_filename = 'costmap1.png';
+% costMap_filename = strcat(data_subfolder,filesep,costMap_filename);
+% costMap = 1 - rescale(im2gray(imread(costMap_filename)));
+% 
+% 
+% mapX = -30 + (0.2:0.4:60); % 60m/2 = 30m
+% mapY = -20 + (0.2:0.4:60); % 50px = 20m
+% [gridX,gridY] = ndgrid(mapX,mapY);
+% costMap_fun = griddedInterpolant(gridX,gridY,rot90(costMap,3));
+% surf(gridX,gridY,costMap_fun(gridX,gridY))
+% xlabel('x');
+% ylabel('y');
+% 
+% % loc2px = @(x,y) round([(x+30)/0.4; (y+20)/0.4]);
+% % px2cost = @(px) costMap(end-px(2),px(1));
+% costMap_fun = @(x,y) interp2(gridX,gridY,rot90(costMap,3),x,y,'nearest');
 
 
 %% MPC Controller Setup
@@ -105,7 +93,7 @@ constraints = [constraints, U_dot_set.A*((u_{1}-u_0)/dt_MPC) <= U_dot_set.b];
 for k = 1:N
     % objective = objective - x_{k}(1) + (x_{k}(2)-0).^2 + (x_{k}(3) - pi)^2;
     % objective = objective + interp2(gridX,gridY,rot90(costMap,3),x_{k}(1),x_{k}(2),'nearest');%costMap_fun(x_{k}(1),x_{k}(2));
-    objective = objective + x_{k}(2);
+    objective = objective + x_{k}(1) + (x_{k}(3)-pi).^2;
 
     constraints = [constraints, x_{k+1} == update_eq(x_{k},u_{k},dt_MPC,sys_fun)];
     constraints = [constraints, U_set.A*u_{k} <= U_set.b];
@@ -115,12 +103,12 @@ for k = 1:N
     end
 end
 
-objective = objective + x_{N+1}(2); % + (x_{N+1}(3)-pi)^2; %<--- minimize these things...
+objective = objective + x_{N+1}(1) + (x_{N+1}(3)-pi)^2; %<--- minimize these things...
 % objective = objective + costMap_fun(x_{N+1}(1),x_{N+1}(2));
 % objective = objective + interp2(gridX,gridY,rot90(costMap,3),x_{N+1}(1),x_{N+1}(2),'nearest');%costMap_fun(x_{k}(1),x_{k}(2));
 
 % opts = sdpsettings('solver','ipopt');
-opts = sdpsettings('solver','ipopt','debug',0,'verbose',0);
+opts = sdpsettings('solver','fmincon','debug',0,'verbose',0);
 % opts = sdpsettings;
 controller = optimizer(constraints, objective, opts, {x_{1},u_0}, [u_{1}]);
 
@@ -149,7 +137,7 @@ end
 
 x = [X_{:}]; u = [U_{:}];
 
-testName = 'Min Y - Unstructured';
+testName = 'Min X with +180 (fmincon)';
 
 
 plot_vehicleModel(tspan,x,u,bounds, ...

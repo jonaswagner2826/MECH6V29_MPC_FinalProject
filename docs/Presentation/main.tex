@@ -122,7 +122,25 @@
 
 \end{frame}
 
-\section{Kinematic Bicycle Model}
+\section{System Model}
+\subsection{Vehicle Modeling}
+
+\begin{frame}
+	\frametitle{Vehicle Kinematic Models}
+	\begin{columns}
+		\begin{column}[t]{0.4\textwidth}
+			Akerman Steering Model
+			\includegraphics[width = \columnwidth]{figs/akermanModel.png}
+		\end{column}
+		\begin{column}[t]{0.4\textwidth}
+			Bicycle Approximation
+			\includegraphics[width = \columnwidth]{figs/bikeModel.png}
+			\[\delta \approx \cfrac{\delta_o + \delta_i}{2}\]
+		\end{column}
+	\end{columns}
+
+\end{frame}
+\subsection{Bicycle Model}
 
 \begin{frame}
 	\frametitle{Kinematic Bicycle Model}
@@ -145,21 +163,33 @@
 			\begin{equation}
 				\beta = \tan^{-1}\qty(\cfrac{l_f \tan(\delta_r) + l_r \tan(\delta_f)}{l_f + l_r})
 			\end{equation}
-			Note: $\delta_r = 0$, $l_f = a = 0.7 [m]$, and $l_r = b = 0.7 [m]$.
+			$\delta_r = 0$, $l_f = a = 0.7 [m]$, and $l_r = b = 0.7 [m]$.
 		\end{column}
 	\end{columns}
 
 \end{frame}
 
-
 \section{Nonlinear MPC Formulation}
-
-
 \begin{frame}
-	\frametitle{<title>}
+	\frametitle{Model Constraints}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\includegraphics[width=0.6\columnwidth]{figs/rk4_method.png}
 
-	
+			Discretized at 1 [s] intervals using \textbf{RK4 method} 
+			(other methods didn't work w/out much smaller time increments) \cite{rk4}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\textbf{Input Constraints}
 
+			\includegraphics[width=0.7\columnwidth]{figs/input_constraints.png}
+
+			$V \in [0,10]$ [m/s]
+			$\theta \in \pm \pi/3$ [rad]
+			$\dot{V} \in [-4,2]$ [m/s\^2]
+			$\dot{\theta} \in \pm \pi/10$ [rad/s]
+		\end{column}
+	\end{columns}
 \end{frame}
 
 %% Simulation Implementation and Results
@@ -176,7 +206,8 @@
 \begin{frame}
 	\frametitle{<title>}
 
-	
+	Solver:
+	Min Y unstructured: 204 [s] w/ IPOPT
 
 \end{frame}
 
